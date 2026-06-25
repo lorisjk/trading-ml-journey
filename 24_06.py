@@ -6,8 +6,11 @@ import yfinance as yf
 def main(): 
     tickers = ["NVDA", "KO"]
     data = get_data(tickers)
-    plotting(data)
-    analyze(data)
+    plotting1(data)
+    correlation_matrix1, correlation_2 = analyze(data)
+    plotting2(correlation_2)
+    
+
 
 
 def process_ticker(ticker, period="2y", window=20):
@@ -26,18 +29,30 @@ def get_data(tickers):
 
 def analyze(data):
     # Schritt 1: alle Vol-Spalten nebeneinander packen, Spaltennamen = Ticker
-    combined = pd.concat({ticker: df["Vol"] for ticker, df in data.items()}, axis=1)
+    combined1 = pd.concat({ticker: df["Vol"] for ticker, df in data.items()}, axis=1)
 
     # Schritt 2: Zeilen mit NaN raus
-    combined_clean = combined.dropna()
+    combined_clean1 = combined1.dropna()
 
     # Schritt 3: Korrelation berechnen
-    correlation_matrix = combined_clean.corr()
-    print(correlation_matrix)
+    correlation_matrix1 = combined_clean1.corr()
+    print(correlation_matrix1)
 
-    return correlation_matrix
 
-def plotting(data):
+     # Schritt 1: alle Log_Return-Spalten nebeneinander packen, Spaltennamen = Ticker
+    combined2 = pd.concat({ticker: df["Log_Return"] for ticker, df in data.items()}, axis=1)
+
+    # Schritt 2: Zeilen mit NaN raus
+    combined_clean2 = combined2.dropna()
+
+    # Schritt 3: Korrelation log_return rolling(60) berechnen
+    correlation_2 = pd.DataFrame(combined_clean2["NVDA"].rolling(60).corr(combined_clean2["KO"]))
+    correlation_matrix2 = combined_clean2.corr()
+    print(correlation_matrix2)
+    
+    return correlation_matrix1, correlation_2
+
+def plotting1(data):
     plt.figure(figsize=(12, 8))
     for ticker, df in data.items():
         plt.plot(df["Vol"], label=f"{ticker} Vol")
@@ -49,6 +64,20 @@ def plotting(data):
     plt.xticks(rotation=45)
     plt.tight_layout()
     plt.savefig("vol_comparison_24_06.png")
+    plt.close()
+
+def plotting2(correlation_2): 
+    plt.figure(figsize=(12,8))
+    plt.plot(correlation_2, label="60-Day Rolling Correlation")
+    plt.xlabel("Time")
+    plt.ylabel("60-Day Rolling Correlation for log returns")
+    plt.axhline(0, color="black", linewidth=0.8) 
+    plt.title("Correlation between NVDA and KO")
+    plt.grid(True)
+    plt.legend()
+    plt.xticks(rotation=45)
+    plt.tight_layout()
+    plt.savefig("correlation_comparison_24_06.png")
     plt.close()
 
 if __name__=="__main__":
