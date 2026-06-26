@@ -61,8 +61,8 @@ def add_rsi(data, window=14):
         rs = gain.rolling(window=window).mean() / loss.rolling(window=window).mean()
         df["RSI"] = 100 - (100 / (1 + rs))
         df.dropna(inplace=True) 
-        print(f"Overbought level for {ticker}: {(df['RSI'] > 70).mean() * 100:.1f}%")
-        print(f"Oversold level for {ticker}: {(df['RSI'] < 30).mean() * 100:.1f}%")
+        print(f"Overbought level for {ticker} as percentage of total days: {(df['RSI'] > 70).mean() * 100:.1f}%")
+        print(f"Oversold level for {ticker} as percentage of total days: {(df['RSI'] < 30).mean() * 100:.1f}%")
 
     return data
 
@@ -84,7 +84,7 @@ def plotting_vol(data):
 
 def plotting_correlation(correlation_2): 
     plt.figure(figsize=(12,8))
-    plt.plot(correlation_2, label="60-Day Rolling Correlation")
+    plt.plot(correlation_2, label="60-Day Rolling Correlation of log retuns")
     plt.xlabel("Time")
     plt.ylabel("60-Day Rolling Correlation for log returns")
     plt.axhline(0, color="black", linewidth=0.8) 
