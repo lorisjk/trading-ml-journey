@@ -11,6 +11,9 @@ def main():
     plotting_correlation(correlation_2)
     add_rsi(data, window=14)
     plotting_rsi(data)
+    add_MACD(data, fast=12, slow=26, signal=9)
+    plotting_MACD_1(data, ticker="NVDA")
+    plotting_MACD_2(data, ticker="KO")
 
 
 
@@ -66,6 +69,16 @@ def add_rsi(data, window=14):
 
     return data
 
+def add_MACD(data, fast=12, slow=26, signal=9):
+    for ticker, df in data.items(): 
+        df["EMA_fast"]=df["Close", ticker].ewm(span=fast, adjust=False).mean()
+        df["EMA_slow"]=df["Close", ticker].ewm(span=slow, adjust=False).mean()
+        df["MACD_line"]=df["EMA_fast"]-df["EMA_slow"]
+        df["Signal_line"]=df["MACD_line"].ewm(span=signal, adjust=False).mean()
+        df["MACD_histogram"]=df["MACD_line"]-df["Signal_line"]
+
+    return data
+
 
 
 def plotting_vol(data):
@@ -110,6 +123,44 @@ def plotting_rsi(data):
     plt.xticks(rotation=45)
     plt.tight_layout()
     plt.savefig("rsi_comparison_26_06.png")
+    plt.close()
+
+def plotting_MACD_1(data, ticker="NVDA"):
+    fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(12, 8), sharex=True)
+    ax1.plot(data[ticker]["Close", ticker], label=f"{ticker} Close Price")
+    ax1.set_ylabel("Price")
+    ax1.legend()
+    ax1.grid(True)
+    ax1.tick_params(rotation=45, axis='x')
+    ax2.plot(data[ticker]["MACD_line"], label="MACD Line", color="blue")
+    ax2.plot(data[ticker]["Signal_line"], label="Signal Line", color="orange")
+    ax2.bar(data[ticker].index, data[ticker]["MACD_histogram"], label="MACD Histogram", color="black", alpha=0.5, width=1.5)
+    ax2.set_ylabel("MACD")
+    ax2.legend()
+    ax2.grid(True)
+    ax2.tick_params(rotation=45, axis='x')
+    fig.suptitle(f"MACD for {ticker}")
+    fig.tight_layout()
+    plt.savefig(f"macd_comparison_{ticker}_26_06.png")
+    plt.close()
+
+def plotting_MACD_2(data, ticker="KO"):
+    fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(12, 8), sharex=True)
+    ax1.plot(data[ticker]["Close", ticker], label=f"{ticker} Close Price")
+    ax1.set_ylabel("Price")
+    ax1.legend()
+    ax1.grid(True)
+    ax1.tick_params(rotation=45, axis='x')
+    ax2.plot(data[ticker]["MACD_line"], label="MACD Line", color="blue")
+    ax2.plot(data[ticker]["Signal_line"], label="Signal Line", color="orange")
+    ax2.bar(data[ticker].index, data[ticker]["MACD_histogram"], label="MACD Histogram", color="black", alpha=0.5, width=1.5)
+    ax2.set_ylabel("MACD")
+    ax2.legend()
+    ax2.grid(True)
+    ax2.tick_params(rotation=45, axis='x')
+    fig.suptitle(f"MACD for {ticker}")
+    fig.tight_layout()
+    plt.savefig(f"macd_comparison_{ticker}_26_06.png")
     plt.close()
 
 if __name__=="__main__":
