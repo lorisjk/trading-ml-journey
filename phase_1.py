@@ -7,7 +7,7 @@ def main():
     tickers = ["NVDA", "KO"]
     data = get_data(tickers)
     plotting_vol(data)
-    correlation_matrix1, correlation_2 = analyze(data)
+    correlation_matrix1, correlation_2 = analyze(data, tickers)
     plotting_correlation(correlation_2)
     add_rsi(data, window=14)
     plotting_rsi(data)
@@ -31,7 +31,7 @@ def get_data(tickers):
     return data
 
 
-def analyze(data):
+def analyze(data, tickers):
     # Schritt 1: alle Vol-Spalten nebeneinander packen, Spaltennamen = Ticker
     combined1 = pd.concat({ticker: df["Vol"] for ticker, df in data.items()}, axis=1)
 
@@ -50,7 +50,7 @@ def analyze(data):
     combined_clean2 = combined2.dropna()
 
     # Schritt 3: Korrelation log_return rolling(60) berechnen
-    correlation_2 = pd.DataFrame(combined_clean2["NVDA"].rolling(60).corr(combined_clean2["KO"]))
+    correlation_2 = pd.DataFrame(combined_clean2[tickers[0]].rolling(60).corr(combined_clean2[tickers[1]]))
     correlation_matrix2 = combined_clean2.corr()
     print(correlation_matrix2)
 
