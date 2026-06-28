@@ -12,13 +12,10 @@ def main():
     add_target(data)
     add_lags(data, columns=["RSI", "MACD_histogram", "Log_Return"], lags=[1])
     train_data, test_data = split_data(data, train_size=0.8)
-    X, y = get_features_and_target(data, feature_columns=["Vol", "RSI", "MACD_histogram", "Log_Return", "RSI_lag1", "MACD_histogram_lag1", "Log_Return_lag1"], target_column=["Target"])
-    
+
     X_train, y_train = get_features_and_target(train_data, feature_columns=["Vol", "RSI", "MACD_histogram", "Log_Return", "RSI_lag1", "MACD_histogram_lag1", "Log_Return_lag1"], target_column=["Target"])
     X_test, y_test = get_features_and_target(test_data, feature_columns=["Vol", "RSI", "MACD_histogram", "Log_Return", "RSI_lag1", "MACD_histogram_lag1", "Log_Return_lag1"], target_column=["Target"])
 
-    print(len(X_train["NVDA"]), len(y_train["NVDA"]))
-    print(len(X_test["NVDA"]), len(y_test["NVDA"]))
 
 def process_ticker(ticker, period="2y", window=20):
     df = yf.download(ticker, period=period)
@@ -66,7 +63,6 @@ def add_rsi(data, window=14):
         loss = -delta.where(delta<0,0)
         rs = gain.rolling(window=window).mean() / loss.rolling(window=window).mean()
         df["RSI"] = 100 - (100 / (1 + rs))
-        df.dropna(inplace=True) 
         print(f"Overbought level for {ticker} as percentage of total days: {(df['RSI'] > 70).mean() * 100:.1f}%")
         print(f"Oversold level for {ticker} as percentage of total days: {(df['RSI'] < 30).mean() * 100:.1f}%")
 
